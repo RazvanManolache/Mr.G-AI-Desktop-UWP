@@ -1,0 +1,189 @@
+﻿<Page
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MrG.Desktop"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Custom="using:Microsoft.UI.Xaml.Controls"
+    xmlns:Converters="using:MrG.Desktop.Converters"
+    x:Class="MrG.Desktop.MainPage"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.DataContext>
+        <local:MainPageViewModel/>
+
+    </Page.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Not connected"  HorizontalAlignment="Left" Padding="30 5 0 0"  VerticalAlignment="Center" Grid.Row="0"/>
+
+        <Custom:TabView VerticalAlignment="Stretch" IsAddTabButtonVisible="False" Grid.Row="1" x:Name="MainTabPanel">
+            <Custom:TabViewItem Header="Setup"  IsClosable="False" x:Name="SetupTab">
+                <Custom:TabViewItem.Visibility>
+                    <Binding Path="LoggedOut" >
+                        <Binding.Converter>
+                            <Converters:BooleanToVisibilityConverter/>
+                        </Binding.Converter>
+                    </Binding>
+                </Custom:TabViewItem.Visibility>
+                <StackPanel  >
+                    <Custom:RadioButtons >
+                        <RadioButton Content="Local server" x:Name="LocalServerRadioButton" IsChecked="True"/>
+                        <RadioButton Content="Online" x:Name="OnlineRadioButton" />
+                    </Custom:RadioButtons>
+                    <StackPanel x:Name="LocalServerForm" Padding="10" >
+                        <StackPanel.Visibility>
+                            <Binding Path="IsChecked" ElementName="LocalServerRadioButton">
+                                <Binding.Converter>
+                                    <Converters:BooleanToVisibilityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </StackPanel.Visibility>
+                        <TextBox x:Name="ServerIpTextBox" PlaceholderText="Server IP" Margin="10" Text="{Binding IP, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Content="Test" Click="TestButton_Click" Margin="10" IsEnabled="{Binding IPValid}"/>
+                        <TextBlock x:Name="LocalServerStatusLabel" Margin="10" Text="{Binding IPError}" >
+                            <TextBlock.Visibility>
+                                <Binding Path="IPError" >
+                                    <Binding.Converter>
+                                        <Converters:TextToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </TextBlock.Visibility>
+                        </TextBlock>
+
+                        <Button Content="Connect" Click="ConnectButton_Click" Margin="10"  IsEnabled="{Binding IPChecked}"/>
+                    </StackPanel>
+                    <StackPanel x:Name="OnlineForm" Padding="10">
+                        <StackPanel.Visibility>
+                            <Binding Path="IsChecked" ElementName="OnlineRadioButton">
+                                <Binding.Converter>
+                                    <Converters:BooleanToVisibilityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </StackPanel.Visibility>
+                        <TextBox x:Name="UsernameTextBox" PlaceholderText="Username" Margin="10"/>
+                        <PasswordBox x:Name="PasswordBox" PlaceholderText="Password" Margin="10"/>
+                        <TextBlock x:Name="ConnectionStatusLabel" Margin="10" Visibility="Collapsed"/>
+                        <Button Content="Login" Click="LoginButton_Click" Margin="10" IsEnabled="False"/>
+                    </StackPanel>
+                </StackPanel>
+            </Custom:TabViewItem>
+            <Custom:TabViewItem Header="Actions" IsClosable="False" x:Name="ActionsTab" >
+                <Custom:TabViewItem.Visibility>
+                    <Binding Path="LoggedIn" ElementName="ViewModel">
+                        <Binding.Converter>
+                            <Converters:BooleanToVisibilityConverter/>
+                        </Binding.Converter>
+                    </Binding>
+                </Custom:TabViewItem.Visibility>
+                <SplitView  IsPaneOpen="True" PanePlacement="Left"   DisplayMode="Inline"  OpenPaneLength="300">
+                    <SplitView.Pane >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBox PlaceholderText="Search" Margin="10" Grid.Row="0"/>
+                            <TextBlock x:Name="ActionsAvailableLabel" Margin="10" Text="No action available" Grid.Row="1">
+                                <TextBlock.Visibility>
+                                    <Binding Path="Actions.Count" ConverterParameter="true">
+                                        <Binding.Converter >
+                                            <Converters:CountToVisibilityConverter />
+                                        </Binding.Converter>
+                                    </Binding>
+                                </TextBlock.Visibility>
+                            </TextBlock>
+                            
+                            <ListBox Margin="10" ItemsSource="{Binding Actions}"   VerticalAlignment="Stretch" Grid.Row="2" SelectionChanged="ActionSelectionChanged">
+                                <ListBoxItem Content="Action 1"/>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="WrapWholeWords"/>
+                                            <TextBlock Text="{Binding Description}" TextWrapping="WrapWholeWords">
+                                                <TextBlock.Visibility>
+                                                    <Binding Path="Description" >
+                                                        <Binding.Converter>
+                                                            <Converters:TextToVisibilityConverter/>
+                                                        </Binding.Converter>
+                                                    </Binding>
+                                                </TextBlock.Visibility>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+
+                                </ListBox.ItemTemplate>
+
+                                <!-- List Items -->
+                            </ListBox>
+                        </Grid>
+                        
+                        
+                    </SplitView.Pane>
+                    <SplitView.Content>
+                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                           
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer  Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Grid x:Name="ActionFormGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+
+                                </Grid.ColumnDefinitions>
+                            </Grid>
+                            </ScrollViewer>
+                            <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                                <StackPanel.Visibility>
+                                    <Binding Path="SelectedAction">
+                                        <Binding.Converter>
+                                            <Converters:ObjectToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+
+                                </StackPanel.Visibility>
+                                <Button Content="Execute" Click="ExecuteAction" Margin="10" HorizontalAlignment="Right"/>
+                                <Button Content="Reset" Click="ResetAction" Margin="10" HorizontalAlignment="Right"/>
+
+                            </StackPanel>
+                        </Grid>
+                    </SplitView.Content>
+                </SplitView>
+                
+            </Custom:TabViewItem>
+            <Custom:TabViewItem Header="Results"  IsClosable="False">
+                <Custom:TabViewItem.Visibility>
+                    <Binding Path="LoggedIn" ElementName="ViewModel">
+                        <Binding.Converter>
+                            <Converters:BooleanToVisibilityConverter/>
+                        </Binding.Converter>
+                    </Binding>
+                </Custom:TabViewItem.Visibility>
+                <local:RequestList/>
+            </Custom:TabViewItem>
+            <Custom:TabViewItem Header="Settings"  IsClosable="False">
+                <Custom:TabViewItem.Visibility>
+                    <Binding Path="LoggedIn" ElementName="ViewModel">
+                        <Binding.Converter>
+                            <Converters:BooleanToVisibilityConverter/>
+                        </Binding.Converter>
+                    </Binding>
+                </Custom:TabViewItem.Visibility>
+                <StackPanel>
+                    <Button Content="Logout" Click="LogoutButton_Click" Margin="10"/>
+                </StackPanel>
+            </Custom:TabViewItem>
+        </Custom:TabView>
+        
+      
+    </Grid>
+</Page>
